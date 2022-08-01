@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  shardingsphere:
+    mode:
+      type: Standalone
+      repository:
+        type: File
+#        props: # Properties of persist repository
+#          foo_key: foo_value
+#          bar_key: bar_value
+      overwrite: false
+    datasource:
+      sharding_sphere_0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      sharding_sphere_1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      names: sharding_sphere_0,sharding_sphere_1

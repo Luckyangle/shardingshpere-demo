@@ -1,0 +1,114 @@
+server:
+  port: 8080
+
+spring:
+  shardingsphere:
+    datasource:
+      write-ds-0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-0-read-0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0-read-0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-0-read-1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0-read-1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-1-read-0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-1-read-0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-1-read-1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-1-read-1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      names: write-ds-0,write-ds-1,write-ds-0-read-0,write-ds-0-read-1,write-ds-1-read-0,write-ds-1-read-1
+    props:
+      sql-show: true
+    rules:
+      sharding:
+        tables:
+          t_order:
+            actual-data-nodes: write-ds-${0..1}.t_order_${0..1}
+            tableStrategy:
+              standard:
+                shardingColumn: order_id
+                shardingAlgorithmName: t-order-inline
+            keyGenerateStrategy:
+              column: order_id
+              keyGeneratorName: snowflake
+          t_order_item:
+            actual-data-nodes: write-ds-${0..1}.t_order_item_${0..1}
+            tableStrategy:
+              standard:
+                shardingColumn: order_id
+                shardingAlgorithmName: t-order-item-inline
+            keyGenerateStrategy:
+              column: order_item_id
+              keyGeneratorName: snowflake
+        bindingTables:
+          - t_order
+          - t_order_item
+        defaultDatabaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: database-inline
+        shardingAlgorithms:
+          database-inline:
+            type: INLINE
+            props:
+              algorithm-expression: write-ds-${user_id % 2}
+          t-order-inline:
+            type: INLINE
+            props:
+              algorithm-expression: t_order_${order_id % 2}
+          t-order-item-inline:
+            type: INLINE
+            props:
+              algorithm-expression: t_order_item_${order_id % 2}
+      dataSources:
+        readwrite_ds_0:
+          static-strategy:
+            writeDataSourceName: write-ds-0
+            readDataSourceNames:
+              - write-ds-0-read-0
+              - write-ds-0-read-1
+          loadBalancerName: random
+        readwrite_ds_1:
+          static-strategy:
+            writeDataSourceName: write-ds-1
+            readDataSourceNames:
+              - write-ds-1-read-0
+              - write-ds-1-read-1
+          loadBalancerName: random
+        loadBalancers:
+          random:
+            type: round_robin
+#      readwrite-splitting:
+#        data-sources:
+#          ds-0:
+#            static-strategy:
+#              write-data-source-name: write-ds-0
+#              read-data-source-names: write-ds-0-read-0, write-ds-0-read-1
+#          ds-1:
+#            static-strategy:
+#              write-data-source-name: write-ds-1
+#              read-data-source-names: write-ds-1-read-0, write-ds-1-read-1

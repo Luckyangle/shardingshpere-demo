@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  shardingsphere:
+    datasource:
+      write-ds-0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-0-read-0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0-read-0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      write-ds-0-read-1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/write-ds-0-read-1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      names: write-ds-0,write-ds-0-read-0,write-ds-0-read-1
+    props:
+      sql-show: true
+    rules:
+      dataSources:
+        readwrite_ds_0:
+          staticStrategy:
+            writeDataSourceName: write-ds-0
+            readDataSourceNames: write-ds-0-read-0,write-ds-0-read-1
+          loadBalancerName: round_robin
+        loadBalancers:
+          round_robin:
+            type: ROUND_ROBIN
+#      readwrite-splitting:
+#        data-sources:
+#          ds-0:
+#            static-strategy:
+#              write-data-source-name: write-ds-0
+#              read-data-source-names: write-ds-0-read-0, write-ds-0-read-1
+#          ds-1:
+#            static-strategy:
+#              write-data-source-name: write-ds-1
+#              read-data-source-names: write-ds-1-read-0, write-ds-1-read-1

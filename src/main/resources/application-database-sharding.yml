@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  shardingsphere:
+    datasource:
+      sharding_sphere_0:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_0?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      sharding_sphere_1:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.zaxxer.hikari.HikariDataSource
+        username: root
+        password: root
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/sharding_sphere_1?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      names: sharding_sphere_0,sharding_sphere_1
+    props:
+      sql-show: true
+    rules:
+      sharding:
+        tables:
+          t_order:
+            actual-data-nodes: sharding_sphere_${0..1}.t_order
+            keyGenerateStrategy:
+              column: order_id
+              keyGeneratorName: snowflake
+          t_order_item:
+            actual-data-nodes: sharding_sphere_${0..1}.t_order_item
+            keyGenerateStrategy:
+              column: order_item_id
+              keyGeneratorName: snowflake
+        defaultDatabaseStrategy:
+          standard:
+            shardingColumn: user_id
+            shardingAlgorithmName: database-inline
+        shardingAlgorithms:
+          database-inline:
+            type: INLINE
+            props:
+              algorithm-expression: sharding_sphere_${user_id % 2}
